@@ -15355,6 +15355,19 @@ var Sidebar = function Sidebar(props) {
         )
       )
     ),
+    _react2.default.createElement(
+      'section',
+      null,
+      _react2.default.createElement(
+        'h4',
+        { className: 'menu-item' },
+        _react2.default.createElement(
+          _reactRouter.Link,
+          { to: '/lyrics' },
+          'LYRICS'
+        )
+      )
+    ),
     _react2.default.createElement('hr', null),
     _react2.default.createElement(
       'section',
@@ -15544,7 +15557,7 @@ function reducer() {
     switch (action.type) {
         case 'SET_LYRICS':
             return Object.assign({}, prevState, { text: action.lyric });
-            break;
+        // break; not needed since there was return
         default:
             return prevState;
     }
@@ -30718,26 +30731,11 @@ var _Playlist = __webpack_require__(130);
 
 var _Playlist2 = _interopRequireDefault(_Playlist);
 
-var _store = __webpack_require__(134);
+var _LyricsContainer = __webpack_require__(302);
 
-var _store2 = _interopRequireDefault(_store);
-
-var _lyrics = __webpack_require__(128);
+var _LyricsContainer2 = _interopRequireDefault(_LyricsContainer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var unsubscribe = _store2.default.subscribe(function () {
-  console.log('----------------');
-  console.log('State changed!!', _store2.default.getState());
-});
-
-_store2.default.dispatch((0, _lyrics.setLyrics)('I can feel it coming in the air tonight ... hold on ...'));
-_store2.default.dispatch((0, _lyrics.setLyrics)('Never gonna give you up, never gonna let you down'));
-
-unsubscribe();
-
-_store2.default.dispatch((0, _lyrics.setLyrics)('Hello, darkness, my old friend.'));
-console.log('Experiment', _store2.default.getState());
 
 _reactDom2.default.render(_react2.default.createElement(
   _reactRouter.Router,
@@ -30756,9 +30754,178 @@ _reactDom2.default.render(_react2.default.createElement(
     ),
     _react2.default.createElement(_reactRouter.Route, { path: '/new-playlist', component: _NewPlaylistContainer2.default }),
     _react2.default.createElement(_reactRouter.Route, { path: 'playlists/:playlistId', component: _Playlist2.default }),
+    _react2.default.createElement(_reactRouter.Route, { path: '/lyrics', component: _LyricsContainer2.default }),
     _react2.default.createElement(_reactRouter.IndexRedirect, { to: '/albums' })
   )
 ), document.getElementById('app'));
+
+/***/ }),
+/* 302 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(3);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _axios = __webpack_require__(77);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+var _store = __webpack_require__(134);
+
+var _store2 = _interopRequireDefault(_store);
+
+var _Lyrics = __webpack_require__(303);
+
+var _Lyrics2 = _interopRequireDefault(_Lyrics);
+
+var _lyrics = __webpack_require__(128);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LyricsContainer = function (_Component) {
+  _inherits(LyricsContainer, _Component);
+
+  function LyricsContainer() {
+    _classCallCheck(this, LyricsContainer);
+
+    var _this = _possibleConstructorReturn(this, (LyricsContainer.__proto__ || Object.getPrototypeOf(LyricsContainer)).call(this));
+
+    _this.state = Object.assign({
+      artistQuery: '',
+      songQuery: ''
+    }, _store2.default.getState());
+
+    _this.handleArtistInput = _this.handleArtistInput.bind(_this);
+    _this.handleSongInput = _this.handleSongInput.bind(_this);
+    _this.handleSubmit = _this.handleSubmit.bind(_this);
+    return _this;
+  }
+
+  _createClass(LyricsContainer, [{
+    key: 'handleSubmit',
+    value: function handleSubmit() {
+
+      if (this.state.artistQuery && this.state.songQuery) {
+
+        _axios2.default.get('/api/lyrics/' + this.state.artistQuery + '/' + this.state.songQuery).then(function (response) {
+          var setLyricsAction = (0, _lyrics.setLyrics)(response.data.lyric);
+          _store2.default.dispatch(setLyricsAction);
+        });
+      }
+    }
+  }, {
+    key: 'handleArtistInput',
+    value: function handleArtistInput(artist) {
+      this.setState({ artistQuery: artist });
+    }
+  }, {
+    key: 'handleSongInput',
+    value: function handleSongInput(song) {
+      this.setState({ songQuery: song });
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      this.unsubscribe = _store2.default.subscribe(function () {
+        _this2.setState(_store2.default.getState());
+      });
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.unsubscribe();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(_Lyrics2.default, {
+        text: this.state.text,
+        setArtist: this.handleArtistInput,
+        setSong: this.handleSongInput,
+        artistQuery: this.state.artistQuery,
+        songQuery: this.state.songQuery,
+        handleSubmit: this.handleSubmit
+      });
+    }
+  }]);
+
+  return LyricsContainer;
+}(_react.Component);
+
+exports.default = LyricsContainer;
+
+/***/ }),
+/* 303 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(3);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Lyrics = function Lyrics(props) {
+
+  var artistChange = function artistChange(e) {
+    props.setArtist(e.target.value);
+  };
+
+  var songChange = function songChange(e) {
+    props.setSong(e.target.value);
+  };
+
+  return _react2.default.createElement(
+    "div",
+    { id: "lyrics" },
+    _react2.default.createElement(
+      "form",
+      { onSubmit: props.handleSubmit },
+      _react2.default.createElement(
+        "div",
+        null,
+        _react2.default.createElement("input", { type: "text", value: props.artistQuery, placeholder: "Artist", onChange: artistChange }),
+        _react2.default.createElement("input", { type: "text", value: props.songQuery, placeholder: "Song", onChange: songChange })
+      ),
+      _react2.default.createElement(
+        "pre",
+        null,
+        props.text || 'Search above!'
+      ),
+      _react2.default.createElement(
+        "button",
+        { type: "submit" },
+        "Search for Lyrics"
+      )
+    )
+  );
+};
+
+exports.default = Lyrics;
 
 /***/ })
 /******/ ]);

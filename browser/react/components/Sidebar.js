@@ -18,6 +18,11 @@ const Sidebar = (props) => {
           <Link to='/artists'>ARTISTS</Link>
         </h4>
       </section>
+      <section>
+        <h4 className="menu-item">
+          <Link to='/lyrics'>LYRICS</Link>
+        </h4>
+      </section>
       <hr />
       <section>
         <h4 className="text-muted">PLAYLISTS</h4>
@@ -32,9 +37,9 @@ const Sidebar = (props) => {
         {
           playlists.map(playlist => {
             return (
-            <li key={playlist.id} className="playlist-item menu-item">
-              <Link to={`/playlists/${playlist.id}`}>{playlist.name}</Link>
-            </li>
+              <li key={playlist.id} className="playlist-item menu-item">
+                <Link to={`/playlists/${playlist.id}`}>{playlist.name}</Link>
+              </li>
             );
           })
         }
